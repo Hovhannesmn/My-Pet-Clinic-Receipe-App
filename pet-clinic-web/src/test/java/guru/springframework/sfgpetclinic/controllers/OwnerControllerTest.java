@@ -56,7 +56,18 @@ class OwnerControllerTest {
     }
 
     @Test
-    void findOwners() {
+    void findOwners() throws Exception {
+        List<Owner> ownerList = new LinkedList<>();
+        ownerList.add(Owner.builder().id(1L).build());
+        ownerList.add(Owner.builder().id(2L).build());
+
+        when(ownerService.findAllByLastNameLike(anyString())).thenReturn(ownerList);
+
+
+        mockMvc.perform(get("owners/findOwners"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("owners/ownersList"))
+                .andExpect(model().attribute("owners", hasSize(1)));
     }
 
     @Test
@@ -68,11 +79,18 @@ class OwnerControllerTest {
     }
 
     @Test
-    void initCreationForm() {
+    void initCreationForm() throws Exception {
+
+
     }
 
     @Test
-    void processCreationForm() {
+    void processCreationForm() throws Exception {
+        Owner owner = Owner.builder().id(1L).build();
+        when(ownerService.save(ArgumentMatchers.any())).thenReturn(owner);
+        mockMvc.perform(post("/owners/new")).andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/owners/1"))
+                .andExpect(model().attributeExists("owner"));
     }
 
     @Test

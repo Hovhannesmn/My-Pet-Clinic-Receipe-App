@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by jt on 7/22/18.
@@ -27,15 +25,6 @@ public class OwnerController {
     public OwnerController(OwnerService ownerService) {
         this.ownerService = ownerService;
     }
-
-    @RequestMapping({"", "/", "/index"})
-   public String listOwners(Model model) {
-        Set<Owner> owners = new HashSet<>();
-        ownerService.findAll().forEach(owners::add); ;
-        model.addAttribute("owners", owners);
-        return "owners/index";
-
-   }
 
     @InitBinder
     public void setAllowedFields(WebDataBinder dataBinder) {

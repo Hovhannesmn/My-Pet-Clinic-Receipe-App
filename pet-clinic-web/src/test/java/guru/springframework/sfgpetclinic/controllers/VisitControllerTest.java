@@ -81,5 +81,11 @@ class VisitControllerTest {
                 .build();
     }
 
-
+    @Test
+    void initNewVisitForm() throws Exception {
+        mockMvc.perform(get(visitsUri))
+                .andExpect(status().isOk())
+                .andExpect(view().name(PETS_CREATE_OR_UPDATE_VISIT_FORM))
+        ;
+    }
 }

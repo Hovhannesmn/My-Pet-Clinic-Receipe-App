@@ -1,5 +1,6 @@
 package guru.springframework.sfgpetclinic.services.springdatajpa;
 
+import guru.springframework.sfgpetclinic.exeptions.CustomNotFoundException;
 import guru.springframework.sfgpetclinic.model.Owner;
 import guru.springframework.sfgpetclinic.repositories.OwnerRepository;
 import guru.springframework.sfgpetclinic.repositories.PetRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -48,8 +50,15 @@ public class OwnerSDJpaService implements OwnerService {
     }
 
     @Override
-    public Owner findById(Long aLong) {
-        return ownerRepository.findById(aLong).orElse(null);
+    public Owner findById(Long aLong)  {
+        if (aLong == null) {
+            throw new NumberFormatException("the " + aLong + " should be number" );
+        }
+        Owner owner = ownerRepository.findById(aLong).orElse(null);
+        if (owner == null) {
+            throw new CustomNotFoundException("The " + aLong + " id is wrong");
+        }
+        return owner;
     }
 
     @Override

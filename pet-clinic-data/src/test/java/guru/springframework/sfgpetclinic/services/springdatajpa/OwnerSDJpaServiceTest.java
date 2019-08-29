@@ -1,5 +1,6 @@
 package guru.springframework.sfgpetclinic.services.springdatajpa;
 
+import guru.springframework.sfgpetclinic.exeptions.CustomNotFoundException;
 import guru.springframework.sfgpetclinic.model.Owner;
 import guru.springframework.sfgpetclinic.repositories.OwnerRepository;
 import guru.springframework.sfgpetclinic.repositories.PetRepository;
@@ -77,14 +78,17 @@ class OwnerSDJpaServiceTest {
         assertNotNull(owner);
     }
 
-    @Test
-    void findByIdNotFound() {
-        when(ownerRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Owner owner = service.findById(1L);
-
-        assertNull(owner);
-    }
+//    @Test()
+//    void findByIdNotFound() throws Exception {
+//        assertThrows(CustomNotFoundException.class, () ->{
+//
+//        });
+////        when(ownerRepository.findById(anyLong())).thenReturn(new CustomNotFoundException("ID"));
+////
+////        CustomNotFoundException exception = service.findById(1l);
+////        assertThrows()
+//
+//    }
 
 
     @Test

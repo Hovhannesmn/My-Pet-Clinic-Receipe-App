@@ -1,0 +1,192 @@
+Index: pet-clinic-web/src/main/java/guru/springframework/sfgpetclinic/controllers/ControllerExceptionHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pet-clinic-web/src/main/java/guru/springframework/sfgpetclinic/controllers/ControllerExceptionHandler.java	(date 1567078598291)
++++ pet-clinic-web/src/main/java/guru/springframework/sfgpetclinic/controllers/ControllerExceptionHandler.java	(date 1567078598291)
+@@ -0,0 +1,28 @@
++package guru.springframework.sfgpetclinic.controllers;
++
++import guru.springframework.sfgpetclinic.exeptions.CustomNotFoundException;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.bind.annotation.ControllerAdvice;
++import org.springframework.web.bind.annotation.ExceptionHandler;
++import org.springframework.web.bind.annotation.ResponseStatus;
++import org.springframework.web.servlet.ModelAndView;
++
++@ControllerAdvice
++public class ControllerExceptionHandler {
++
++    @ResponseStatus(HttpStatus.BAD_REQUEST)
++    @ExceptionHandler(NumberFormatException.class)
++    public ModelAndView handleWrongNumberFormat(Exception exception) {
++        ModelAndView modelAndView = new ModelAndView("owners/404error");
++        modelAndView.addObject("exception", exception);
++        return modelAndView;
++    }
++
++    @ResponseStatus(HttpStatus.NOT_FOUND)
++    @ExceptionHandler(CustomNotFoundException.class)
++    public ModelAndView notFountOwner(Exception e) {
++        ModelAndView modelAndView = new ModelAndView("owners/404error");
++        modelAndView.addObject("exception",  e);
++        return modelAndView;
++    }
++}
+Index: pet-clinic-data/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pet-clinic-data/pom.xml	(revision 7e828a82f8594590ae8978c91337b38f9164682d)
++++ pet-clinic-data/pom.xml	(date 1567076657330)
+@@ -61,6 +61,12 @@
+             <version>2.22.0</version>
+             <scope>test</scope>
+         </dependency>
++        <dependency>
++            <groupId>org.springframework</groupId>
++            <artifactId>spring-web</artifactId>
++            <version>5.2.0.RC1</version>
++            <scope>compile</scope>
++        </dependency>
+     </dependencies>
+ 
+     <build>
+Index: pet-clinic-data/src/main/java/guru/springframework/sfgpetclinic/services/springdatajpa/OwnerSDJpaService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pet-clinic-data/src/main/java/guru/springframework/sfgpetclinic/services/springdatajpa/OwnerSDJpaService.java	(revision 7e828a82f8594590ae8978c91337b38f9164682d)
++++ pet-clinic-data/src/main/java/guru/springframework/sfgpetclinic/services/springdatajpa/OwnerSDJpaService.java	(date 1567078520612)
+@@ -1,5 +1,6 @@
+ package guru.springframework.sfgpetclinic.services.springdatajpa;
+ 
++import guru.springframework.sfgpetclinic.exeptions.CustomNotFoundException;
+ import guru.springframework.sfgpetclinic.model.Owner;
+ import guru.springframework.sfgpetclinic.repositories.OwnerRepository;
+ import guru.springframework.sfgpetclinic.repositories.PetRepository;
+@@ -10,6 +11,7 @@
+ 
+ import java.util.HashSet;
+ import java.util.List;
++import java.util.Optional;
+ import java.util.Set;
+ 
+ /**
+@@ -48,8 +50,15 @@
+     }
+ 
+     @Override
+-    public Owner findById(Long aLong) {
+-        return ownerRepository.findById(aLong).orElse(null);
++    public Owner findById(Long aLong)  {
++        if (aLong == null) {
++            throw new NumberFormatException("the " + aLong + " should be number" );
++        }
++        Owner owner = ownerRepository.findById(aLong).orElse(null);
++        if (owner == null) {
++            throw new CustomNotFoundException("The " + aLong + " id is wrong");
++        }
++        return owner;
+     }
+ 
+     @Override
+Index: pet-clinic-web/src/main/resources/templates/owners/404error.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pet-clinic-web/src/main/resources/templates/owners/404error.html	(date 1567075714817)
++++ pet-clinic-web/src/main/resources/templates/owners/404error.html	(date 1567075714817)
+@@ -0,0 +1,30 @@
++<!DOCTYPE html>
++<html lang="en" xmlns:th="http://www.thymeleaf.org">
++<head>
++    <meta charset="UTF-8"/>
++    <title>404 Not Found Error</title>
++
++    <!-- Latest compiled and minified CSS -->
++    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
++          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"
++          th:href="@{/webjars/bootstrap/3.3.7-1/css/bootstrap.min.css}">
++
++    <script src="/webjars/jquery/1.11.1/jquery.min.js"></script>
++
++    <!-- Latest compiled and minified JavaScript -->
++    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
++            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
++            crossorigin="anonymous" th:src="@{/webjars/bootstrap/3.3.7-1/js/bootstrap.min.js}"></script>
++</head>
++<body>
++<div class="container-fluid" style="margin-top: 20px">
++    <div class="row">
++        <div class="col-md-6 col-md-offset-3">
++            <h1>404 Not Found</h1>
++            <p th:text="${exception.getMessage()}"></p>
++        </div>
++    </div>
++</div>
++
++</body>
++</html>
+\ No newline at end of file
+Index: pet-clinic-data/src/main/java/guru/springframework/sfgpetclinic/exeptions/CustomNotFoundException.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pet-clinic-data/src/main/java/guru/springframework/sfgpetclinic/exeptions/CustomNotFoundException.java	(date 1567076803985)
++++ pet-clinic-data/src/main/java/guru/springframework/sfgpetclinic/exeptions/CustomNotFoundException.java	(date 1567076803985)
+@@ -0,0 +1,17 @@
++package guru.springframework.sfgpetclinic.exeptions;
++
++
++import org.springframework.http.HttpStatus;
++import org.springframework.web.bind.annotation.ResponseStatus;
++
++@ResponseStatus(HttpStatus.NOT_FOUND)
++public class CustomNotFoundException extends RuntimeException {
++    CustomNotFoundException() {
++        super();
++    }
++
++    public CustomNotFoundException(String message) {
++        super(message);
++    }
++
++}
+Index: pet-clinic-web/src/main/java/guru/springframework/sfgpetclinic/controllers/OwnerController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pet-clinic-web/src/main/java/guru/springframework/sfgpetclinic/controllers/OwnerController.java	(revision 7e828a82f8594590ae8978c91337b38f9164682d)
++++ pet-clinic-web/src/main/java/guru/springframework/sfgpetclinic/controllers/OwnerController.java	(date 1567078598287)
+@@ -1,7 +1,9 @@
+ package guru.springframework.sfgpetclinic.controllers;
+ 
++import guru.springframework.sfgpetclinic.exeptions.CustomNotFoundException;
+ import guru.springframework.sfgpetclinic.model.Owner;
+ import guru.springframework.sfgpetclinic.services.OwnerService;
++import org.springframework.http.HttpStatus;
+ import org.springframework.stereotype.Controller;
+ import org.springframework.ui.Model;
+ import org.springframework.validation.BindingResult;
+@@ -64,10 +66,10 @@
+     }
+ 
+     @GetMapping("/{ownerId}")
+-    public ModelAndView showOwner(@PathVariable Long ownerId) {
+-        ModelAndView mav = new ModelAndView("owners/ownerDetails");
+-        mav.addObject(ownerService.findById(ownerId));
+-        return mav;
++    public String showOwner(@PathVariable String ownerId, Model model) {
++
++        model.addAttribute("owner", ownerService.findById(Long.valueOf(ownerId)));
++        return "owners/ownerDetails";
+     }
+ 
+     @GetMapping("/new")
